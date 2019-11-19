@@ -1,0 +1,41 @@
+server:  
+  port: 8999
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  grpc:
+    remote-servers[0]: 
+      server: micro-node-douyin
+      host: 127.0.0.1
+      port: 6565
+  datasource:
+    url: jdbc:mysql://192.168.1.153:3306/cubic_douyin?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+    username: root
+    password: ff871125
+    driverClassName: com.mysql.jdbc.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 15
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: DatebookHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 10000
+      connection-test-query: SELECT 1
+mybatis:
+  type-aliases-package: com.anoyi.douyin.entity
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    # 开启驼峰命名转换，如：Table(create_time) -> Entity(createTime)。不需要我们关心怎么进行字段匹配，mybatis会自动识别`大写字母与下划线`
+    map-underscore-to-camel-case: true
+jwt-config:
+  header: x-auth-token
+  tokenHead: Bearer
+  secret: MDk4ZjZiY2Q0NjIxZDM3M1NhZGU0ZTgzMjYyN2I0ZjY=
+  expiration: 864000
+  antPermitPaths:
+    - /**/login
+    - /**/register

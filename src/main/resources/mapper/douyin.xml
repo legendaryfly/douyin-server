@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anoyi.douyin.mapper.DouyinMapper">
+	<select id="isHasDyUser" parameterType="String" resultType="Integer">
+		SELECT COUNT(*) FROM douyin_user_base WHERE dy_id=#{dy_id}
+	</select>
+	
+	<select id="listDyUser" resultType="com.anoyi.douyin.entity.DyUser">
+		SELECT * FROM douyin_user_base
+	</select>
+	
+	<insert id="insertDyUser" parameterType="com.anoyi.douyin.entity.DyUser">
+  		INSERT INTO douyin_user_base (dy_id) VALUES (#{dyId})
+  	</insert>
+  	
+  	<delete id="delDyUser" parameterType="String">
+	  	DELETE FROM douyin_user_base WHERE dy_id=#{dy_id}
+	</delete>
+	  
+	  
+	<insert id="insertDyUserVO" parameterType="com.anoyi.douyin.entity.DyUserVO">
+  		INSERT INTO douyin_user_info
+  					(
+  					 dy_id,
+  					 dy_tk,
+  					 nickname,
+  					 avatar,
+  					 shortid,
+  					 sign,
+  					 follower,
+  					 focus,
+  					 likenum,
+  					 opus,
+  					 add_time
+  					)
+  		      VALUES(
+  		      		 #{id},
+  					 #{tk},
+  					 #{nickname},
+  					 #{avatar},
+  					 #{shortId},
+  					 #{signature},
+  					 #{follower},
+  					 #{focus},
+  					 #{likenum},
+  					 #{opus},
+  					 #{add_time}
+  					)
+  	</insert>  
+  	
+  		<insert id="insertDyAweme" parameterType="com.anoyi.douyin.entity.Aweme">
+  		INSERT INTO douyin_videos
+  					(
+  					 dy_id,
+  					 aweme_id,
+  					 `desc`,
+  					 aweme_type,
+  					 media_type,
+  					 digg_count,
+  					 comment_count,
+  					 play_count,
+  					 share_count,
+  					 forward_count,
+  					 cover_img,
+  					 add_time
+  					)
+  		      VALUES(
+  		      		 #{dy_id},
+  					 #{aweme_id},
+  					 #{desc},
+  					 #{aweme_type},
+  					 #{media_type},
+  					 #{digg_count},
+  					 #{comment_count},
+  					 #{play_count},
+  					 #{share_count},
+  					 #{forward_count},
+  					 #{cover_img},
+  					 #{add_time}
+  					)
+  	</insert> 
+	  
+</mapper>
