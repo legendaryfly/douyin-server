@@ -5,6 +5,7 @@ import java.util.List;
 import com.anoyi.douyin.entity.Aweme;
 import com.anoyi.douyin.entity.DyUser;
 import com.anoyi.douyin.entity.DyUserVO;
+import com.anoyi.douyin.entity.TotalUser;
 
 public interface DouyinMapper {
 	
@@ -39,7 +40,7 @@ public interface DouyinMapper {
 	void delDyUser(String dy_id);
 	
 	
-	void getTotalList();
+	List<TotalUser> getTotalList(String add_time);
 	
 	
 }

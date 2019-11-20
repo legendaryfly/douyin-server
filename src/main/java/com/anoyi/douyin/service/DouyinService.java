@@ -12,6 +12,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -21,8 +22,8 @@ import com.anoyi.douyin.entity.DyUser;
 import com.anoyi.douyin.entity.DyUserVO;
 import com.anoyi.douyin.entity.Resp;
 import com.anoyi.douyin.entity.RespFactory;
-import com.anoyi.douyin.entity.Result;
-import com.anoyi.douyin.entity.ResultGenerator;
+import com.anoyi.douyin.entity.TotalPage;
+import com.anoyi.douyin.entity.TotalUser;
 import com.anoyi.douyin.mapper.DouyinMapper;
 import com.anoyi.douyin.rpc.RpcNodeDyService;
 import com.anoyi.douyin.util.DyNumberConvertor;
@@ -201,6 +202,7 @@ public class DouyinService {
     /**
      * 获取
      * */
+    @Scheduled(cron = "0 */15 * * * ?")
     public void doDouyin() {
     	List<DyUser> list_user = mapper.listDyUser();
     	String add_time = formatDate();
@@ -272,10 +274,55 @@ public class DouyinService {
     }
 	
 	public Resp<Object> getTotalList() {
-		mapper.getTotalList();
-		return RespFactory.success("删除用户成功！");
+		String add_time = trnTime();
+		List<TotalUser> list = mapper.getTotalList(add_time);
+		Integer total_focus=0;
+		Integer total_follower=0;
+		Integer total_likenum=0;
+		Integer total_opus=0;
+		Integer total_digg=0;
+		Integer total_comment=0;
+		Integer total_play=0;
+		Integer total_share=0;
+		for(TotalUser bean : list) {
+			total_focus +=bean.getFocus();
+			total_follower +=bean.getFollower();
+			total_likenum +=bean.getLikenum();
+			total_opus +=bean.getOpus();
+			total_digg +=bean.getSum_digg();
+			total_comment +=bean.getSum_comment();
+			total_play +=bean.getSum_play();
+			total_share +=bean.getSum_share();
+		}
+		TotalPage total_count = new TotalPage();
+		total_count.setTotal_digg(total_digg);
+		total_count.setTotal_comment(total_comment);
+		total_count.setTotal_focus(total_focus);
+		total_count.setTotal_follower(total_follower);
+		total_count.setTotal_likenum(total_likenum);
+		total_count.setTotal_opus(total_opus);
+		total_count.setTotal_play(total_play);
+		total_count.setTotal_share(total_share);
+		total_count.setList(list);
+		
+		return RespFactory.success(total_count);
     }
 	
-	
+	public String trnTime() {
+		String add_time = formatDate();
+		String[] times = add_time.split(":");
+		int cutt_min = Integer.valueOf(times[1]);
+		String ctmin = "";
+		if(cutt_min>=0 && cutt_min<15) {
+			ctmin = "00";
+		}else if(cutt_min>=15 && cutt_min<30) {
+			ctmin = "15";
+		}else if(cutt_min>=30 && cutt_min<45) {
+			ctmin = "30";
+		}else if(cutt_min>=45 && cutt_min<59) {
+			ctmin = "45";
+		}
+		return times[0]+":"+ctmin;
+	}
 
 }

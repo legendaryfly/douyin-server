@@ -83,9 +83,9 @@ public class DouyinController {
 	 /**
 	     * 总统计分析页面
 	 * */
-    @GetMapping("/total")
-    public void getTotalList() {
-    	douyinService.getTotalList();
+    @GetMapping("/total/list")
+    public Resp<Object> getTotalList() {
+    	return douyinService.getTotalList();
     }
 
 }

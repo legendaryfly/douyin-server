@@ -79,5 +79,8 @@
   					 #{add_time}
   					)
   	</insert> 
-	  
+	
+	<select id="getTotalList" resultType="com.anoyi.douyin.entity.TotalUser">
+		SELECT * FROM douyin_user_base
+	</select>  
 </mapper>
