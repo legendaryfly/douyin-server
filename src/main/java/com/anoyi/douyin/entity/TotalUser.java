@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class TotalUser {
-	private String user_id;
+	private String userId;
 
-    private String dy_id;
+    private String dyId;
 
-    private String dy_tk;
+    private String dyTk;
 
     private String nickname;
 
@@ -18,22 +18,22 @@ public class TotalUser {
 
     private String sign;
     
-    private Integer focus;
+    private String focus;
     
-    private Integer follower;
+    private String follower;
     
-    private Integer likenum;
+    private String likenum;
     
-    private Integer opus;
+    private String opus;
     
-    private Integer sum_digg;
+    private String sumDigg;
     
-    private Integer sum_comment;
+    private String sumComment;
     
-    private Integer sum_play;
+    private String sumPlay;
     
-    private Integer sum_share;
+    private String sumShare;
     
-    private String add_time;
+    private String addTime;
     
 }

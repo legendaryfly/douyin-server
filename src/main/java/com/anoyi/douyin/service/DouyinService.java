@@ -276,6 +276,11 @@ public class DouyinService {
 	public Resp<Object> getTotalList() {
 		String add_time = trnTime();
 		List<TotalUser> list = mapper.getTotalList(add_time);
+		if(list == null || list.size()==0) {
+			TotalPage total_count = new TotalPage();
+			total_count.setList(list);
+			return RespFactory.success(total_count);
+		}
 		Integer total_focus=0;
 		Integer total_follower=0;
 		Integer total_likenum=0;
@@ -285,14 +290,14 @@ public class DouyinService {
 		Integer total_play=0;
 		Integer total_share=0;
 		for(TotalUser bean : list) {
-			total_focus +=bean.getFocus();
-			total_follower +=bean.getFollower();
-			total_likenum +=bean.getLikenum();
-			total_opus +=bean.getOpus();
-			total_digg +=bean.getSum_digg();
-			total_comment +=bean.getSum_comment();
-			total_play +=bean.getSum_play();
-			total_share +=bean.getSum_share();
+			total_focus +=Integer.valueOf(bean.getFocus());
+			total_follower +=Integer.valueOf(bean.getFollower());
+			total_likenum +=Integer.valueOf(bean.getLikenum());
+			total_opus +=Integer.valueOf(bean.getOpus());
+			total_digg +=Integer.valueOf(bean.getSumDigg());
+			total_comment +=Integer.valueOf(bean.getSumComment());
+			total_play +=Integer.valueOf(bean.getSumPlay());
+			total_share +=Integer.valueOf(bean.getSumShare());
 		}
 		TotalPage total_count = new TotalPage();
 		total_count.setTotal_digg(total_digg);

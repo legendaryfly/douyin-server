@@ -80,9 +80,9 @@
   					)
   	</insert> 
 	
-	<select id="getTotalList" resultType="com.anoyi.douyin.entity.TotalUser">
+	<select id="getTotalList" parameterType="String" resultType="com.anoyi.douyin.entity.TotalUser">
 		SELECT t1.*,t2.sum_digg,t2.sum_comment,t2.sum_play,t2.sum_share FROM douyin_user_info t1,
 		(SELECT t1.dy_id,SUM(t1.digg_count) sum_digg,SUM(comment_count) sum_comment,SUM(play_count) sum_play,SUM(share_count) sum_share FROM douyin_videos t1 WHERE t1.add_time = #{add_time} GROUP BY t1.dy_id )t2 
-		WHERE t1.add_time = #{add_time} AND t1.dy_id=t2.dy_id;
+		WHERE t1.add_time = #{add_time} AND t1.dy_id=t2.dy_id ORDER BY sum_play DESC;
 	</select>  
 </mapper>
