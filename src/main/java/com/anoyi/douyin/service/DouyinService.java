@@ -2,6 +2,7 @@ package com.anoyi.douyin.service;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -12,14 +13,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.anoyi.douyin.entity.Aweme;
 import com.anoyi.douyin.entity.DyAweme;
 import com.anoyi.douyin.entity.DyUser;
+import com.anoyi.douyin.entity.DyUserPage;
 import com.anoyi.douyin.entity.DyUserVO;
+import com.anoyi.douyin.entity.DyUserVideo;
 import com.anoyi.douyin.entity.Resp;
 import com.anoyi.douyin.entity.RespFactory;
 import com.anoyi.douyin.entity.TotalPage;
@@ -202,7 +204,7 @@ public class DouyinService {
     /**
      * 获取
      * */
-    @Scheduled(cron = "0 */15 * * * ?")
+//    @Scheduled(cron = "0 */15 * * * ?")
     public void doDouyin() {
     	List<DyUser> list_user = mapper.listDyUser();
     	String add_time = formatDate();
@@ -274,13 +276,14 @@ public class DouyinService {
     }
 	
 	public Resp<Object> getTotalList() {
-		String add_time = trnTime();
-		List<TotalUser> list = mapper.getTotalList(add_time);
-		if(list == null || list.size()==0) {
+		String add_time = mapper.getFinalTime();
+		if(add_time == null || "".equals(add_time)) {
 			TotalPage total_count = new TotalPage();
+			List<TotalUser> list = new ArrayList<TotalUser>();
 			total_count.setList(list);
 			return RespFactory.success(total_count);
 		}
+		List<TotalUser> list = mapper.getTotalList(add_time);
 		Integer total_focus=0;
 		Integer total_follower=0;
 		Integer total_likenum=0;
@@ -313,21 +316,39 @@ public class DouyinService {
 		return RespFactory.success(total_count);
     }
 	
-	public String trnTime() {
-		String add_time = formatDate();
-		String[] times = add_time.split(":");
-		int cutt_min = Integer.valueOf(times[1]);
-		String ctmin = "";
-		if(cutt_min>=0 && cutt_min<15) {
-			ctmin = "00";
-		}else if(cutt_min>=15 && cutt_min<30) {
-			ctmin = "15";
-		}else if(cutt_min>=30 && cutt_min<45) {
-			ctmin = "30";
-		}else if(cutt_min>=45 && cutt_min<59) {
-			ctmin = "45";
+	public Resp<Object> getDyUserDetail(String dy_id) {
+		String add_time = mapper.getFinalTime();
+		DyUserPage page = new DyUserPage();
+		TotalUser dyUser = new TotalUser();
+		List<DyUserVideo> list = new ArrayList<DyUserVideo>();
+		
+		if(add_time == null || "".equals(add_time)) {
+			page.setDyUser(dyUser);
+			page.setList(list);
+			return RespFactory.success(page);
 		}
-		return times[0]+":"+ctmin;
+		dyUser = mapper.getDyUser(add_time, dy_id);
+		list = mapper.getDyUserVideos(add_time, dy_id);
+		page.setDyUser(dyUser);
+		page.setList(list);
+		return RespFactory.success(page);
 	}
+	
+//	public String trnTime() {
+//		String add_time = formatDate();
+//		String[] times = add_time.split(":");
+//		int cutt_min = Integer.valueOf(times[1]);
+//		String ctmin = "";
+//		if(cutt_min>=0 && cutt_min<15) {
+//			ctmin = "00";
+//		}else if(cutt_min>=15 && cutt_min<30) {
+//			ctmin = "15";
+//		}else if(cutt_min>=30 && cutt_min<45) {
+//			ctmin = "30";
+//		}else if(cutt_min>=45 && cutt_min<59) {
+//			ctmin = "45";
+//		}
+//		return times[0]+":"+ctmin;
+//	}
 
 }

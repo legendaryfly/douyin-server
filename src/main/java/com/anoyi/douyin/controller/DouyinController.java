@@ -87,5 +87,15 @@ public class DouyinController {
     public Resp<Object> getTotalList() {
     	return douyinService.getTotalList();
     }
+    
+    /**
+     * 总统计分析页面
+	 * */
+	@GetMapping("/detail/user/{id}")
+	public Resp<Object> getDyUserDetail(@PathVariable("id") String id) {
+		return douyinService.getDyUserDetail(id);
+	}
+
+
 
 }
