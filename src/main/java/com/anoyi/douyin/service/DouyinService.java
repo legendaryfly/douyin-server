@@ -13,6 +13,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -137,13 +138,13 @@ public class DouyinService {
             dyUser.getExtraInfo().put("constellation", constellation);
             String focus = document.select("span.focus.block span.num").text();
 //            dyUser.getFollowInfo().put("focus", focus);
-            dyUser.setFocus(focus);
+            dyUser.setFocus(toStr(focus));
             String follower = document.select("span.follower.block span.num").text();
 //            dyUser.getFollowInfo().put("follower", follower);
-            dyUser.setFollower(follower);
+            dyUser.setFollower(toStr(follower));
             String likeNum = document.select("span.liked-num.block span.num").text();
 //            dyUser.getFollowInfo().put("likeNum", likeNum);
-            dyUser.setLikenum(likeNum);
+            dyUser.setLikenum(toStr(likeNum));
             DyAweme videos = videoList(dyId, tk, "0");
             dyUser.setVideos(videos);
 //            dyUser.getFollowInfo().put("opus", String.valueOf(dyUser.getVideos().getAweme_list().size()));
@@ -204,7 +205,7 @@ public class DouyinService {
     /**
      * 获取
      * */
-//    @Scheduled(cron = "0 */15 * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     public void doDouyin() {
     	List<DyUser> list_user = mapper.listDyUser();
     	String add_time = formatDate();
@@ -350,5 +351,14 @@ public class DouyinService {
 //		}
 //		return times[0]+":"+ctmin;
 //	}
-
+	public String toStr(String str) {
+		String c = "";
+		if(str!=null && !"".equals(str) && str.indexOf("w") != -1) {
+			Integer b = (int)(Double.valueOf(str.split("w")[0])*10000);
+			c= String.valueOf(b);
+			return c;
+		}
+		return str;
+		
+	}
 }
