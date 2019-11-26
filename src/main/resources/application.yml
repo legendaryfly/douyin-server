@@ -39,3 +39,7 @@ jwt-config:
   antPermitPaths:
     - /**/login
     - /**/register
+
+logging: 
+  level: 
+    root: ERROR

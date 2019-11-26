@@ -182,7 +182,7 @@ public class DouyinService {
      * HTTP 请求
      */
     private Document httpGet(String url) throws IOException {
-        Connection.Response response = Jsoup.connect(url)
+        Connection.Response response = Jsoup.connect(url).timeout(30000)
                 .header("user-agent", UserAgent)
                 .header("x-requested-with", XMLHttpRequest)
                 .header("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
