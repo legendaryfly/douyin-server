@@ -81,7 +81,18 @@ public class DouyinService {
      * 用户视频列表
      */
     public DyAweme videoList(String dyId, String dytk, String cursor) {
-        return getVideoList(dyId, dytk, cursor);
+    	DyAweme bean = getVideoList(dyId, dytk, cursor);
+    	int isMore = bean.getHas_more();
+    	boolean has_more = (isMore==1)?true:false; 
+    	String cursor_d = String.valueOf(bean.getMax_cursor());
+    	while (has_more) {
+    		DyAweme beanTemp = new DyAweme();
+    		beanTemp = getVideoList(dyId, dytk, cursor_d);
+    		cursor_d = String.valueOf(beanTemp.getMax_cursor());
+    		has_more = (beanTemp.getHas_more()==1)?true:false; 
+    		bean.getAweme_list().addAll(beanTemp.getAweme_list());
+    	}
+        return bean;
     }
 
     /**
@@ -91,6 +102,9 @@ public class DouyinService {
         String script = null;
         try {
             Document document = Jsoup.connect("https://www.douyin.com/share/user/" + dyId).get();
+            if(document.select("script") ==null ) {
+            	return null;	
+            }
             script = document.select("script").get(1).html();
         } catch (IOException e) {
             e.printStackTrace();
@@ -100,7 +114,7 @@ public class DouyinService {
 //        System.out.println(api);
         try {
             Document document = httpGet(api);
-//            System.out.println(document);
+//            System.out.println(document.text());
             return JSON.parseObject(document.text(), DyAweme.class);
             
         } catch (IOException e) {
@@ -118,14 +132,18 @@ public class DouyinService {
             DyUserVO dyUser = new DyUserVO();
             dyUser.setId(dyId);
             Document document = httpGet(api);
-            
             parseIconFonts(document);
             String nickname = document.select("p.nickname").text();
+            
             dyUser.setNickname(nickname);
             String avatar = document.select("img.avatar").attr("src");
             dyUser.setAvatar(avatar);
             String tk = match(document.html(), "dytk: '(.*?)'");
+            if(tk == null || "".equals(tk)) {
+            	return null;
+            }
             dyUser.setTk(tk);
+            
             String shortId = document.select("p.shortid").text();
             dyUser.setShortId(shortId);
             String verifyInfo = document.select("div.verify-info").text();
@@ -205,13 +223,16 @@ public class DouyinService {
     /**
      * 获取
      * */
-    @Scheduled(cron = "0 */15 * * * ?")
+    @Scheduled(cron = "0 */30 * * * ?")
     public void doDouyin() {
     	List<DyUser> list_user = mapper.listDyUser();
     	String add_time = formatDate();
     	for(DyUser bean : list_user) {
     		String dy_id = bean.getDyId();
     		DyUserVO vo = getDyUser(dy_id);
+    		if(vo ==null) {
+    			continue;
+    		}
     		vo.setAdd_time(add_time);
     		insertDyUserVO(vo);
     		for(Aweme awemeVo : vo.getVideos().getAweme_list()) {

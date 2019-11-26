@@ -26,14 +26,14 @@ public class TotalUser {
     
     private String opus;
     
-    private String sumDigg;
+    private String sumDigg="0";
     
-    private String sumComment;
+    private String sumComment="0";
     
-    private String sumPlay;
+    private String sumPlay="0";
     
-    private String sumShare;
+    private String sumShare="0";
     
-    private String addTime;
+    private String addTime="0";
     
 }
