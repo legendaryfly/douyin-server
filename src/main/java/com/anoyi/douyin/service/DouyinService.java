@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,7 +74,7 @@ public class DouyinService {
                     .get();
             log.info(document.title());
         }catch (IOException e){
-            e.printStackTrace();
+        	log.error(e.getMessage());
         }
         return null;
     }
@@ -81,46 +83,53 @@ public class DouyinService {
      * 用户视频列表
      */
     public DyAweme videoList(String dyId, String dytk, String cursor) {
-    	DyAweme bean = getVideoList(dyId, dytk, cursor);
+    	String signature = getSignature(dyId);
+    	if(signature ==null) {
+    		return null;
+    	}
+    	DyAweme bean = getVideoList(dyId, dytk, cursor,signature);
     	int isMore = bean.getHas_more();
     	boolean has_more = (isMore==1)?true:false; 
     	String cursor_d = String.valueOf(bean.getMax_cursor());
     	while (has_more) {
     		DyAweme beanTemp = new DyAweme();
-    		beanTemp = getVideoList(dyId, dytk, cursor_d);
+    		beanTemp = getVideoList(dyId, dytk, cursor_d,signature);
     		cursor_d = String.valueOf(beanTemp.getMax_cursor());
     		has_more = (beanTemp.getHas_more()==1)?true:false; 
     		bean.getAweme_list().addAll(beanTemp.getAweme_list());
     	}
         return bean;
     }
+    
+    public String getSignature(String dyId) {
+    	String script = null;
+        try {
+            Document document = Jsoup.connect("https://www.douyin.com/share/user/" + dyId).get();
+            if(document.select("script") ==null) {
+            	return null;	
+            }
+            script = document.select("script").get(1).html();
+        } catch (Exception e) {
+        	log.error(e.getMessage());
+            return null;
+        }
+        String signature = rpcNodeDyService.generateSignature(dyId, script);
+        return signature;
+    }
 
     /**
        * 获取抖音用户视频列表
      */
-    public DyAweme getVideoList(String dyId, String dytk, String cursor){
-        String script = null;
-        try {
-            Document document = Jsoup.connect("https://www.douyin.com/share/user/" + dyId).get();
-            if(document.select("script") ==null ) {
-            	return null;	
-            }
-            script = document.select("script").get(1).html();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String signature = rpcNodeDyService.generateSignature(dyId, script);
+    public DyAweme getVideoList(String dyId, String dytk, String cursor,String signature){
         String api = String.format(VIDEO_LIST_API, dyId, cursor, signature, dytk);
-//        System.out.println(api);
         try {
             Document document = httpGet(api);
-//            System.out.println(document.text());
             return JSON.parseObject(document.text(), DyAweme.class);
-            
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+        	log.error(e.getMessage());
+        	return null;
         }
-        throw new RuntimeException("HTTP request error: " + api);
+//        throw new RuntimeException("HTTP request error: " + api);
     }
 
     /**
@@ -164,6 +173,9 @@ public class DouyinService {
 //            dyUser.getFollowInfo().put("likeNum", likeNum);
             dyUser.setLikenum(toStr(likeNum));
             DyAweme videos = videoList(dyId, tk, "0");
+            if(videos == null) {
+            	return null;
+            }
             dyUser.setVideos(videos);
 //            dyUser.getFollowInfo().put("opus", String.valueOf(dyUser.getVideos().getAweme_list().size()));
             if(dyUser.getVideos().getAweme_list() == null) {
@@ -173,7 +185,7 @@ public class DouyinService {
             }
             return dyUser;
         } catch (IOException e) {
-            e.printStackTrace();
+        	log.error(e.getMessage());
         }
         throw new RuntimeException("HTTP request error: " + api);
     }
@@ -223,14 +235,18 @@ public class DouyinService {
     /**
      * 获取
      * */
-    @Scheduled(cron = "0 */30 * * * ?")
+    @Scheduled(cron = "0 */60 * * * ?")
     public void doDouyin() {
     	List<DyUser> list_user = mapper.listDyUser();
     	String add_time = formatDate();
+    	Map<String,String> map = new HashMap<String,String>();
     	for(DyUser bean : list_user) {
     		String dy_id = bean.getDyId();
     		DyUserVO vo = getDyUser(dy_id);
-    		if(vo ==null) {
+    		if(vo == null) {
+    			if(dy_id!=null) {
+    				map.put(dy_id, dy_id);
+    			}
     			continue;
     		}
     		vo.setAdd_time(add_time);
@@ -247,6 +263,37 @@ public class DouyinService {
     			insertDyAweme(awemeVo);
     		}
     	}
+    	int i = 3;
+    	while((i==0)?false:true) {
+    		i--;
+    		for(String dy_id: map.keySet()) {
+    			if("0".equals(map.get(dy_id))) {
+    				continue;
+    			}
+        		DyUserVO vo = getDyUser(dy_id);
+        		if(vo == null) {
+        			continue;
+        		}
+        		map.put(dy_id,"0");
+        		vo.setAdd_time(add_time);
+        		insertDyUserVO(vo);
+        		for(Aweme awemeVo : vo.getVideos().getAweme_list()) {
+        			awemeVo.setAdd_time(add_time);
+        			awemeVo.setDy_id(dy_id);
+        			awemeVo.setCover_img(awemeVo.getVideo().getCover().getUrl_list()[0]);
+        			awemeVo.setDigg_count(awemeVo.getStatistics().getDigg_count());
+        			awemeVo.setComment_count(awemeVo.getStatistics().getComment_count());
+        			awemeVo.setPlay_count(awemeVo.getStatistics().getPlay_count());
+        			awemeVo.setShare_count(awemeVo.getStatistics().getShare_count());
+        			awemeVo.setForward_count(awemeVo.getStatistics().getForward_count());
+        			insertDyAweme(awemeVo);
+        		}
+    		}
+    		if(map.size()==0) {
+    			i=0;	
+    		}
+    	}
+    	
     }
     
     
