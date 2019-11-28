@@ -12,12 +12,12 @@ spring:
       host: 127.0.0.1
       port: 6565
   datasource:
-    url: jdbc:mysql://192.168.1.153:3306/cubic_douyin?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
-    username: root
-    password: ff871125
-    #url: jdbc:mysql://DB-Dy:3306/douyin?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
-    #username: douyin
-    #password: douyin
+    #url: jdbc:mysql://192.168.1.153:3306/cubic_douyin?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+    #username: root
+    #password: ff871125
+    url: jdbc:mysql://DB-Dy:3306/douyin?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+    username: douyin
+    password: douyin
     driverClassName: com.mysql.jdbc.Driver
     hikari:
       minimum-idle: 5
