@@ -20,7 +20,7 @@ import com.anoyi.douyin.service.DouyinService;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("/douyin")
+@RequestMapping("/api/douyin")
 @AllArgsConstructor
 @CrossOrigin("*")
 public class DouyinController {
