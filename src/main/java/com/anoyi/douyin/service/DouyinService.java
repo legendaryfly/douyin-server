@@ -235,7 +235,7 @@ public class DouyinService {
     /**
      * 获取
      * */
-    @Scheduled(cron = "0 */60 * * * ?")
+//    @Scheduled(cron = "0 */60 * * * ?")
     public void doDouyin() {
     	List<DyUser> list_user = mapper.listDyUser();
     	String add_time = formatDate();
